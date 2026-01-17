@@ -4,12 +4,27 @@ const PIECE_QUEUE_SIZE: usize = 14;
 const MATRIX_WIDTH: usize = 10;
 const MATRIX_HEIGHT: usize = 20;
 
-pub struct RingBuffer<T, const C: usize> {
-    buffer: [T; C],
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
+enum GamePhase {
+    #[default]
+    GenerationPhase,
+    FallingPhase,
+    LockPhase,
+    PatternPhase,
+    // IterationPhase,
+    // AnimationPhase,
+    EliminatePhase,
+    CompletionPhase,
+}
+
+#[derive(Debug, Clone)]
+pub struct RingBuffer<T, const S: usize> {
+    buffer: [T; S],
     head: usize,
     len: usize,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Tetromino {
     O,
     I,
@@ -20,13 +35,16 @@ pub enum Tetromino {
     Z,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Rotation {
+    #[default]
     North,
     East,
     South,
     West,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ActivePiece {
     kind: Tetromino,
     rotation: Rotation,
@@ -34,26 +52,39 @@ pub struct ActivePiece {
     y: isize,
 }
 
+#[derive(Debug, Clone)]
 pub struct GameState {
+    phase: GamePhase,
     hold: Option<Tetromino>,
     piece_queue: RingBuffer<Tetromino, PIECE_QUEUE_SIZE>,
-    matrix: [[Tetromino; MATRIX_WIDTH]; MATRIX_HEIGHT],
+    matrix: [[Option<Tetromino>; MATRIX_WIDTH]; MATRIX_HEIGHT],
     active_piece: ActivePiece,
     score: usize,
     lines: usize,
     level: usize,
 }
 
+#[derive(Debug, Clone)]
 pub struct Game<I: Input, R: Render> {
     state: GameState,
     input: I,
     render: R,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+impl<I: Input, R: Render> Game<I, R> {
+    pub fn tick(&mut self) {
+        match self.state.phase {
+            GamePhase::GenerationPhase => {
+
+            },
+            _ => (),
+        }
+
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InputAction {
-    #[default]
-    None,
     Left,
     Right,
     HardDrop,
@@ -65,7 +96,7 @@ pub enum InputAction {
 }
 
 pub trait Input {
-    fn next_input(&mut self) -> InputAction;
+    fn next_input(&mut self) -> Option<InputAction>;
 }
 
 pub trait Render {
