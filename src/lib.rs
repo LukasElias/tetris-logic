@@ -160,6 +160,28 @@ impl GameState {
     }
 }
 
+impl Default for GameState {
+    fn default() -> Self {
+        let active_piece = ActivePiece {
+            kind: Tetromino::O,
+            rotation: Rotation::default(),
+            x: 0,
+            y: 0,
+        };
+
+        Self {
+            phase: GamePhase::default(),
+            hold: None,
+            piece_queue: RingBuffer::new(),
+            matrix: [[None; MATRIX_WIDTH]; MATRIX_HEIGHT],
+            active_piece: active_piece,
+            score: 0,
+            lines: 0,
+            level: 1,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Game<I: Input, R: Render, RNG: Rng> {
     state: GameState,
@@ -169,6 +191,15 @@ pub struct Game<I: Input, R: Render, RNG: Rng> {
 }
 
 impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
+    pub fn new(input: I, render: R, rng: RNG) -> Self {
+        Self {
+            state: GameState::default(),
+            input,
+            render,
+            rng,
+        }
+    }
+
     pub fn tick(&mut self) {
         match self.state.phase {
             GamePhase::GenerationPhase => {
