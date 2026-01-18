@@ -1,10 +1,20 @@
 #![no_std]
 
 use core::{mem::MaybeUninit, ops::{Index, IndexMut}};
+use rand::{Rng, seq::SliceRandom};
 
 const PIECE_QUEUE_SIZE: usize = 14;
 const MATRIX_WIDTH: usize = 10;
 const MATRIX_HEIGHT: usize = 20;
+const ALL_TETROMINOS: [Tetromino; 7] = [
+    Tetromino::O,
+    Tetromino::I,
+    Tetromino::T,
+    Tetromino::L,
+    Tetromino::J,
+    Tetromino::S,
+    Tetromino::Z,
+];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
 enum GamePhase {
@@ -35,28 +45,28 @@ impl<T: Copy, const N: usize> RingBuffer<T, N> {
         }
     }
 
-    pub fn push(&mut self, value: T) -> Result<T, ()> {
+    pub fn push(&mut self, value: T) -> T {
         if self.len == self.buffer.len() {
-            return Err(());
+            panic!("The buffer is full, you can't push anymore.");
         }
 
         self.buffer[(self.head + self.len) % self.capacity()].write(value);
 
         self.len += 1;
 
-        Ok(value)
+        value
     }
 
-    pub fn pop(&mut self) -> Result<T, ()> {
+    pub fn pop(&mut self) -> T {
         if self.len == 0 {
-            return Err(());
+            panic!("There's nothing to pop");
         }
 
         let value = self.buffer[self.head];
         self.head = (self.head + 1) % self.capacity();
 
         // There SHOULD be a value here, since you can only fill the buffer up using push.
-        Ok(unsafe { value.assume_init() })
+        unsafe { value.assume_init() }
     }
 
     pub fn len(&self) -> usize {
@@ -134,22 +144,46 @@ pub struct GameState {
     level: usize,
 }
 
+impl GameState {
+    fn shuffle<RNG: Rng>(&mut self, rng: &mut RNG) {
+        if self.piece_queue.capacity() - self.piece_queue.len() < 7 {
+            panic!("Not enough space for a new bag");
+        }
+
+        let mut bag = ALL_TETROMINOS;
+
+        bag.shuffle(rng);
+
+        for piece in bag {
+            self.piece_queue.push(piece);
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
-pub struct Game<I: Input, R: Render> {
+pub struct Game<I: Input, R: Render, RNG: Rng> {
     state: GameState,
     input: I,
     render: R,
+    rng: RNG,
 }
 
-impl<I: Input, R: Render> Game<I, R> {
+impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
     pub fn tick(&mut self) {
         match self.state.phase {
             GamePhase::GenerationPhase => {
+                // Shuffle a new bag if the there's space for a new bag of 7
 
+                while self.state.piece_queue.capacity() - self.state.piece_queue.len() >= 7 {
+                    self.state.shuffle(&mut self.rng);
+                }
+
+                // Generate a piece
+
+                self.state.active_piece.kind = self.state.piece_queue.pop();
             },
             _ => (),
         }
-
     }
 }
 
