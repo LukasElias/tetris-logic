@@ -1,6 +1,9 @@
 #![no_std]
 
-use core::{mem::MaybeUninit, ops::{Index, IndexMut}};
+use core::{
+    mem::MaybeUninit,
+    ops::{Index, IndexMut},
+};
 use rand::{Rng, seq::SliceRandom};
 
 const PIECE_QUEUE_SIZE: usize = 14;
@@ -83,7 +86,9 @@ impl<T: Copy, const N: usize> Index<usize> for RingBuffer<T, N> {
 
     fn index(&self, index: usize) -> &Self::Output {
         if index >= self.len {
-            panic!("We took it too far - Ninajirachi. You indexed too far into my Ring Buffer, you silly goose.")
+            panic!(
+                "We took it too far - Ninajirachi. You indexed too far into my Ring Buffer, you silly goose."
+            )
         }
 
         let value: &MaybeUninit<T> = &self.buffer[(self.head + index) % self.capacity()];
@@ -95,7 +100,9 @@ impl<T: Copy, const N: usize> Index<usize> for RingBuffer<T, N> {
 impl<T: Copy, const N: usize> IndexMut<usize> for RingBuffer<T, N> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         if index >= self.len {
-            panic!("We took it too far - Ninajirachi. You indexed too far into my Ring Buffer, you silly goose.")
+            panic!(
+                "We took it too far - Ninajirachi. You indexed too far into my Ring Buffer, you silly goose."
+            )
         }
 
         let value: &mut MaybeUninit<T> = &mut self.buffer[(self.head + index) % self.capacity()];
@@ -212,7 +219,7 @@ impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
                 // Generate a piece
 
                 self.state.active_piece.kind = self.state.piece_queue.pop();
-            },
+            }
             _ => (),
         }
     }
