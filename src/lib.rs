@@ -43,6 +43,8 @@ impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
                 // Generate a piece
 
                 let piece = self.state.piece_queue_pop();
+
+                self.state.generate_new_piece(piece);
             }
             _ => (),
         }

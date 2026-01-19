@@ -13,6 +13,43 @@ const ALL_TETROMINOS: [Tetromino; 7] = [
     Tetromino::Z,
 ];
 
+// These are flipped, so that the 0, 0 is gonna be the bottom left of the bounding box.
+const O_NORTH: [[bool; 2]; 2] = [
+    [true, true],
+    [true, true],
+];
+const I_NORTH: [[bool; 4]; 4] = [
+    [false, false, false, false],
+    [false, false, false, false],
+    [true,  true,  true,  true ],
+    [false, false, false, false],
+];
+const T_NORTH: [[bool; 3]; 3] = [
+    [false, false, false],
+    [true,  true,  true ],
+    [false, true,  false],
+];
+const L_NORTH: [[bool; 3]; 3] = [
+    [false, false, false],
+    [true,  true,  true ],
+    [false, false, true ],
+];
+const J_NORTH: [[bool; 3]; 3] = [
+    [false, false, false],
+    [true,  true,  true ],
+    [true,  false, false],
+];
+const S_NORTH: [[bool; 3]; 3] = [
+    [false, false, false],
+    [true,  true,  false],
+    [false, true,  true ],
+];
+const Z_NORTH: [[bool; 3]; 3] = [
+    [false, false, false],
+    [false, true,  false],
+    [false, true,  true ],
+];
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub enum GamePhase {
     #[default]
@@ -116,6 +153,16 @@ pub enum Tetromino {
     Z,
 }
 
+impl Tetromino {
+    fn generation_coords(&self) -> (isize, isize) {
+        match *self {
+            Self::O => (4, 20), // 5th col, 21st row
+            Self::I => (3, 18), // 4th col, 21st row
+            _ => (3, 19),       // 4th col, 21st row
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Rotation {
     #[default]
@@ -199,6 +246,23 @@ impl GameState {
         self.active_piece
     }
 
+    pub fn generate_new_piece(&mut self, kind: Tetromino) {
+        if self.phase != GamePhase::GenerationPhase {
+            panic!("Tried to generate a tetromino outside of the generation phase. Somebody should fix this code");
+        }
+
+        let (x, y) = kind.generation_coords();
+
+        let active_piece = ActivePiece {
+            kind,
+            rotation: Rotation::default(),
+            x,
+            y,
+        };
+
+        self.active_piece = active_piece;
+    }
+
     // score
 
     // lines
@@ -208,6 +272,8 @@ impl GameState {
 
 impl Default for GameState {
     fn default() -> Self {
+        // The active_piece is a dummy, since it'll get overwritten when the 7-bag gets shuffled and a piece
+        // is generated in the GenerationPhase
         let active_piece = ActivePiece {
             kind: Tetromino::O,
             rotation: Rotation::default(),
