@@ -1,54 +1,7 @@
+mod constants;
+
 use crate::{Index, IndexMut, MaybeUninit, Rng, SliceRandom};
-
-const PIECE_QUEUE_SIZE: usize = 14;
-const MATRIX_WIDTH: usize = 10;
-const MATRIX_HEIGHT: usize = 20;
-const ALL_TETROMINOS: [Tetromino; 7] = [
-    Tetromino::O,
-    Tetromino::I,
-    Tetromino::T,
-    Tetromino::L,
-    Tetromino::J,
-    Tetromino::S,
-    Tetromino::Z,
-];
-
-// These are flipped, so that the 0, 0 is gonna be the bottom left of the bounding box.
-const O_NORTH: [[bool; 2]; 2] = [
-    [true, true],
-    [true, true],
-];
-const I_NORTH: [[bool; 4]; 4] = [
-    [false, false, false, false],
-    [false, false, false, false],
-    [true,  true,  true,  true ],
-    [false, false, false, false],
-];
-const T_NORTH: [[bool; 3]; 3] = [
-    [false, false, false],
-    [true,  true,  true ],
-    [false, true,  false],
-];
-const L_NORTH: [[bool; 3]; 3] = [
-    [false, false, false],
-    [true,  true,  true ],
-    [false, false, true ],
-];
-const J_NORTH: [[bool; 3]; 3] = [
-    [false, false, false],
-    [true,  true,  true ],
-    [true,  false, false],
-];
-const S_NORTH: [[bool; 3]; 3] = [
-    [false, false, false],
-    [true,  true,  false],
-    [false, true,  true ],
-];
-const Z_NORTH: [[bool; 3]; 3] = [
-    [false, false, false],
-    [false, true,  false],
-    [false, true,  true ],
-];
+use constants::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub enum GamePhase {
