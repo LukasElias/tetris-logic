@@ -45,6 +45,17 @@ impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
                 let piece = self.state.piece_queue.pop();
 
                 self.state.generate_new_piece(piece);
+
+                // Drop active piece one row and check for collisions etc...
+
+                self.state.drop();
+
+                // Enter fall state
+
+                self.state.phase = GamePhase::FallingPhase;
+            },
+            GamePhase::FallingPhase => {
+                todo!()
             }
             _ => (),
         }

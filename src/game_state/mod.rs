@@ -183,11 +183,28 @@ impl GameState {
         self.active_piece.y = y;
     }
 
+    pub fn drop(&mut self) -> bool {
+        let can_drop = true;
+
+        // check if you can drop
+
+        if can_drop {
+            self.active_piece.y -= 1;
+        }
+
+        can_drop
+    }
+
     // score
 
     // lines
 
     // level
+
+    pub fn fall_speed(&self) -> f32 {
+        // (0.8 - ((self.level as f32 - 1.0) * 0.007)).powf(self.level as f32 - 1.0)
+        todo!()
+    }
 }
 
 impl Default for GameState {
