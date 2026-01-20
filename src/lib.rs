@@ -34,7 +34,7 @@ impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
     }
 
     pub fn tick(&mut self) {
-        match self.state.phase() {
+        match self.state.phase {
             GamePhase::GenerationPhase => {
                 while self.state.space_for_bag() {
                     self.state.shuffle_new_bag(&mut self.rng);
@@ -42,7 +42,7 @@ impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
 
                 // Generate a piece
 
-                let piece = self.state.piece_queue_pop();
+                let piece = self.state.piece_queue.pop();
 
                 self.state.generate_new_piece(piece);
             }

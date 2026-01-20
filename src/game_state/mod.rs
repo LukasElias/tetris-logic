@@ -135,39 +135,18 @@ pub struct ActivePiece {
 
 #[derive(Debug, Clone)]
 pub struct GameState {
-    phase: GamePhase,
-    hold_piece: Option<Tetromino>,
-    piece_queue: RingBuffer<Tetromino, PIECE_QUEUE_SIZE>,
-    matrix: [[Option<Tetromino>; MATRIX_WIDTH]; MATRIX_HEIGHT],
-    active_piece: ActivePiece,
-    score: usize,
-    lines: usize,
-    level: usize,
+    pub phase: GamePhase,
+    pub hold_piece: Option<Tetromino>,
+    pub piece_queue: RingBuffer<Tetromino, PIECE_QUEUE_SIZE>,
+    pub matrix: [[Option<Tetromino>; MATRIX_WIDTH]; MATRIX_HEIGHT],
+    pub active_piece: ActivePiece,
+    pub score: usize,
+    pub lines: usize,
+    pub level: usize,
 }
 
 impl GameState {
-    // phase
-    pub fn phase(&self) -> GamePhase {
-        self.phase
-    }
-
-    // hold
-    pub fn hold_piece(&self) -> Option<Tetromino> {
-        self.hold_piece
-    }
-
-    pub fn set_hold_piece(&mut self, piece: Tetromino) {
-        self.hold_piece = Some(piece);
-    }
-
     // piece_queue
-    pub fn piece_queue(&self) -> &RingBuffer<Tetromino, PIECE_QUEUE_SIZE> {
-        &self.piece_queue
-    }
-
-    pub fn piece_queue_mut(&mut self) -> &mut RingBuffer<Tetromino, PIECE_QUEUE_SIZE> {
-        &mut self.piece_queue
-    }
 
     pub fn space_for_bag(&self) -> bool {
         self.piece_queue.capacity() - self.piece_queue.len() >= 7
@@ -187,17 +166,9 @@ impl GameState {
         }
     }
 
-    pub fn piece_queue_pop(&mut self) -> Tetromino {
-        self.piece_queue.pop()
-    }
-
     // matrix
 
     // active_piece
-
-    pub fn active_piece(&self) -> ActivePiece {
-        self.active_piece
-    }
 
     pub fn generate_new_piece(&mut self, kind: Tetromino) {
         if self.phase != GamePhase::GenerationPhase {
@@ -206,14 +177,10 @@ impl GameState {
 
         let (x, y) = kind.generation_coords();
 
-        let active_piece = ActivePiece {
-            kind,
-            rotation: Rotation::default(),
-            x,
-            y,
-        };
-
-        self.active_piece = active_piece;
+        self.active_piece.kind = kind;
+        self.active_piece.rotation = Rotation::default();
+        self.active_piece.x = x;
+        self.active_piece.y = y;
     }
 
     // score
