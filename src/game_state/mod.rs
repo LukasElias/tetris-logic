@@ -114,15 +114,35 @@ impl Tetromino {
             _ => (3, 19),       // 4th col, 21st row
         }
     }
+
+    fn bounding_box_size(&self) -> usize {
+        match *self {
+            Self::O => 2,
+            Self::I => 4,
+            _ => 3,
+        }
+    }
+
+    fn lowest_mino(&self, rotation: Rotation, x: usize) -> Option<usize> {
+        match *self {
+            Self::O => O_LOWEST_MINO[rotation as usize][x],
+            Self::I => I_LOWEST_MINO[rotation as usize][x],
+            Self::T => T_LOWEST_MINO[rotation as usize][x],
+            Self::L => L_LOWEST_MINO[rotation as usize][x],
+            Self::J => J_LOWEST_MINO[rotation as usize][x],
+            Self::S => S_LOWEST_MINO[rotation as usize][x],
+            Self::Z => Z_LOWEST_MINO[rotation as usize][x],
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Rotation {
     #[default]
-    North,
-    East,
-    South,
-    West,
+    North = 0,
+    East = 1,
+    South = 2,
+    West = 3,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -168,6 +188,18 @@ impl GameState {
 
     // matrix
 
+    pub fn out_of_bounds(x: isize, y: isize) -> bool {
+        x < 0 || x >= MATRIX_WIDTH as isize || y < 0 || y >= MATRIX_HEIGHT as isize
+    }
+    
+    pub fn is_empty(&self, x: isize, y: isize) -> bool {
+        if GameState::out_of_bounds(x, y) {
+            return true
+        }
+
+        self.matrix[x as usize][y as usize].is_none()
+    }
+
     // active_piece
 
     pub fn generate_new_piece(&mut self, kind: Tetromino) {
@@ -184,12 +216,27 @@ impl GameState {
     }
 
     pub fn drop(&mut self) -> bool {
-        let can_drop = true;
-
-        // check if you can drop
-
-        if can_drop {
+        if self.can_drop() {
             self.active_piece.y -= 1;
+            return true;
+        }
+
+        return false;
+    }
+
+    pub fn can_drop(&self) -> bool {
+        // check the cells that are gonna get occupied if we drop
+
+        let size = self.active_piece.kind.bounding_box_size();
+
+        let mut can_drop = true;
+
+        for x in 0..size {
+            if let Some(y) = self.active_piece.kind.lowest_mino(self.active_piece.rotation, x) {
+                if !self.is_empty(self.active_piece.x + x as isize, self.active_piece.y + y as isize - 1) {
+                    can_drop = false;
+                }
+            }
         }
 
         can_drop
