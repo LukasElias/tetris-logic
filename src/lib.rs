@@ -57,6 +57,8 @@ impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
             }
             _ => (),
         }
+
+        self.render.render(&self.state);
     }
 }
 

@@ -197,7 +197,7 @@ impl GameState {
             return true;
         }
 
-        self.matrix[x as usize][y as usize].is_none()
+        self.matrix[y as usize][x as usize].is_none()
     }
 
     // active_piece
