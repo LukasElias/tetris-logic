@@ -3,13 +3,11 @@
 mod game_state;
 
 use {
-    game_state::{
-        GamePhase,
-    },
     core::{
         mem::MaybeUninit,
         ops::{Index, IndexMut},
     },
+    game_state::GamePhase,
     rand::{Rng, seq::SliceRandom},
 };
 
@@ -53,7 +51,7 @@ impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
                 // Enter fall state
 
                 self.state.phase = GamePhase::FallingPhase;
-            },
+            }
             GamePhase::FallingPhase => {
                 todo!()
             }

@@ -25,9 +25,9 @@ macro_rules! create_luts {
 }
 
 const fn gen_rotations<const N: usize>(north: [[bool; N]; N]) -> [[[bool; N]; N]; 4] {
-    let east  = rotate_lut(north);
+    let east = rotate_lut(north);
     let south = rotate_lut(east);
-    let west  = rotate_lut(south);
+    let west = rotate_lut(south);
 
     [north, east, south, west]
 }
@@ -76,56 +76,77 @@ const fn lowest_mino<const N: usize>(shape: [[bool; N]; N]) -> [Option<usize>; N
 
 // O
 
-create_luts!(2, O, [
-    [true, true],
-    [true, true],
-]);
+create_luts!(2, O, [[true, true], [true, true],]);
 
 // I
 
-create_luts!(4, I, [
-    [false, false, false, false],
-    [false, false, false, false],
-    [true,  true,  true,  true ],
-    [false, false, false, false],
-]);
+create_luts!(
+    4,
+    I,
+    [
+        [false, false, false, false],
+        [false, false, false, false],
+        [true, true, true, true],
+        [false, false, false, false],
+    ]
+);
 
 // T
 
-create_luts!(3, T, [
-    [false, false, false],
-    [true,  true,  true ],
-    [false, true,  false],
-]);
+create_luts!(
+    3,
+    T,
+    [
+        [false, false, false],
+        [true, true, true],
+        [false, true, false],
+    ]
+);
 
 // L
 
-create_luts!(3, L, [
-    [false, false, false],
-    [true,  true,  true ],
-    [false, false, true ],
-]);
+create_luts!(
+    3,
+    L,
+    [
+        [false, false, false],
+        [true, true, true],
+        [false, false, true],
+    ]
+);
 
 // J
 
-create_luts!(3, J, [
-    [false, false, false],
-    [true,  true,  true ],
-    [true,  false, false],
-]);
+create_luts!(
+    3,
+    J,
+    [
+        [false, false, false],
+        [true, true, true],
+        [true, false, false],
+    ]
+);
 
 // S
 
-create_luts!(3, S, [
-    [false, false, false],
-    [true,  true,  false],
-    [false, true,  true ],
-]);
+create_luts!(
+    3,
+    S,
+    [
+        [false, false, false],
+        [true, true, false],
+        [false, true, true],
+    ]
+);
 
 // Z
 
-create_luts!(3, Z, [
-    [false, false, false],
-    [false,  true,  true],
-    [true,  true,  false],
-]);
+create_luts!(
+    3,
+    Z,
+    [
+        [false, false, false],
+        [false, true, true],
+        [true, true, false],
+    ]
+);

@@ -191,10 +191,10 @@ impl GameState {
     pub fn out_of_bounds(x: isize, y: isize) -> bool {
         x < 0 || x >= MATRIX_WIDTH as isize || y < 0 || y >= MATRIX_HEIGHT as isize
     }
-    
+
     pub fn is_empty(&self, x: isize, y: isize) -> bool {
         if GameState::out_of_bounds(x, y) {
-            return true
+            return true;
         }
 
         self.matrix[x as usize][y as usize].is_none()
@@ -204,7 +204,9 @@ impl GameState {
 
     pub fn generate_new_piece(&mut self, kind: Tetromino) {
         if self.phase != GamePhase::GenerationPhase {
-            panic!("Tried to generate a tetromino outside of the generation phase. Somebody should fix this code");
+            panic!(
+                "Tried to generate a tetromino outside of the generation phase. Somebody should fix this code"
+            );
         }
 
         let (x, y) = kind.generation_coords();
@@ -232,8 +234,15 @@ impl GameState {
         let mut can_drop = true;
 
         for x in 0..size {
-            if let Some(y) = self.active_piece.kind.lowest_mino(self.active_piece.rotation, x) {
-                if !self.is_empty(self.active_piece.x + x as isize, self.active_piece.y + y as isize - 1) {
+            if let Some(y) = self
+                .active_piece
+                .kind
+                .lowest_mino(self.active_piece.rotation, x)
+            {
+                if !self.is_empty(
+                    self.active_piece.x + x as isize,
+                    self.active_piece.y + y as isize - 1,
+                ) {
                     can_drop = false;
                 }
             }
