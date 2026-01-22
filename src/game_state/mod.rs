@@ -1,6 +1,6 @@
 mod constants;
 
-use crate::{Duration, Index, IndexMut, MaybeUninit, Rng, SliceRandom, InputAction};
+use crate::{Duration, Index, IndexMut, MaybeUninit, Rng, SliceRandom};
 use constants::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
@@ -281,7 +281,12 @@ impl GameState {
     pub fn fall_speed(&self) -> Duration {
         // (0.8 - ((self.level as f32 - 1.0) * 0.007)).powf(self.level as f32 - 1.0)
         // amount of time for a single drop
-        todo!()
+
+        if self.level > LEVELS {
+            return FALL_TABLE[LEVELS - 1];
+        }
+
+        FALL_TABLE[self.level - 1]
     }
 }
 

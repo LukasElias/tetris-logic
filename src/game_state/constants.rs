@@ -1,4 +1,4 @@
-use crate::game_state::Tetromino;
+use crate::{Duration, game_state::Tetromino};
 use paste::paste;
 
 pub const PIECE_QUEUE_SIZE: usize = 14;
@@ -12,6 +12,24 @@ pub const ALL_TETROMINOS: [Tetromino; 7] = [
     Tetromino::J,
     Tetromino::S,
     Tetromino::Z,
+];
+pub const LEVELS: usize = 15;
+pub const FALL_TABLE: [Duration; LEVELS] = [
+    Duration::from_millis(1000),
+    Duration::from_millis(793),
+    Duration::from_millis(618),
+    Duration::from_millis(473),
+    Duration::from_millis(355),
+    Duration::from_millis(262),
+    Duration::from_millis(190),
+    Duration::from_millis(135),
+    Duration::from_millis(94),
+    Duration::from_millis(64),
+    Duration::from_millis(43),
+    Duration::from_millis(28),
+    Duration::from_millis(18),
+    Duration::from_millis(11),
+    Duration::from_millis(7),
 ];
 
 macro_rules! create_luts {
