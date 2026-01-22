@@ -6,6 +6,7 @@ use {
     core::{
         mem::MaybeUninit,
         ops::{Index, IndexMut},
+        time::Duration,
     },
     game_state::GamePhase,
     rand::{Rng, seq::SliceRandom},
@@ -31,7 +32,7 @@ impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
         }
     }
 
-    pub fn tick(&mut self) {
+    pub fn tick(&mut self, delta_time: Duration) {
         match self.state.phase {
             GamePhase::GenerationPhase => {
                 while self.state.space_for_bag() {
@@ -53,7 +54,18 @@ impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
                 self.state.phase = GamePhase::FallingPhase;
             }
             GamePhase::FallingPhase => {
-                todo!()
+                // Handle input
+
+                match self.input.next_input() {
+                    Some(_) => (),
+                    None => (),
+                }
+
+                // Try to drop and enter lock phase if hit ground
+
+                if self.state.simulate_piece(delta_time) {
+                    self.state.phase = GamePhase::LockPhase;
+                }
             }
             _ => (),
         }

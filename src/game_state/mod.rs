@@ -1,6 +1,6 @@
 mod constants;
 
-use crate::{Index, IndexMut, MaybeUninit, Rng, SliceRandom};
+use crate::{Duration, Index, IndexMut, MaybeUninit, Rng, SliceRandom, InputAction};
 use constants::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default)]
@@ -151,6 +151,8 @@ pub struct ActivePiece {
     rotation: Rotation,
     x: isize,
     y: isize,
+    time_existed: Duration,
+    time_simulated: Duration,
 }
 
 #[derive(Debug, Clone)]
@@ -193,7 +195,9 @@ impl GameState {
     }
 
     pub fn is_empty(&self, x: isize, y: isize) -> bool {
-        if GameState::out_of_bounds(x, y) {
+        if x < 0 || x >= MATRIX_WIDTH as isize || y < 0 {
+            return false;
+        } else if y >= MATRIX_HEIGHT as isize {
             return true;
         }
 
@@ -215,6 +219,8 @@ impl GameState {
         self.active_piece.rotation = Rotation::default();
         self.active_piece.x = x;
         self.active_piece.y = y;
+        self.active_piece.time_existed = Duration::ZERO;
+        self.active_piece.time_simulated = Duration::ZERO;
     }
 
     pub fn drop(&mut self) -> bool {
@@ -251,14 +257,30 @@ impl GameState {
         can_drop
     }
 
+    pub fn simulate_piece(&mut self, delta_time: Duration) -> bool {
+        let mut on_surface = false;
+        self.active_piece.time_existed += delta_time;
+
+        while self.active_piece.time_existed > self.active_piece.time_simulated {
+            if !self.drop() {
+                on_surface = true;
+            }
+
+            self.active_piece.time_simulated += self.fall_speed();
+        }
+
+        on_surface
+    }
+
     // score
 
     // lines
 
     // level
 
-    pub fn fall_speed(&self) -> f32 {
+    pub fn fall_speed(&self) -> Duration {
         // (0.8 - ((self.level as f32 - 1.0) * 0.007)).powf(self.level as f32 - 1.0)
+        // amount of time for a single drop
         todo!()
     }
 }
@@ -272,6 +294,8 @@ impl Default for GameState {
             rotation: Rotation::default(),
             x: 0,
             y: 0,
+            time_existed: Duration::ZERO,
+            time_simulated: Duration::ZERO,
         };
 
         Self {
