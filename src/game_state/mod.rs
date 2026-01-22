@@ -122,18 +122,6 @@ impl Tetromino {
             _ => 3,
         }
     }
-
-    fn lowest_mino(&self, rotation: Rotation, x: usize) -> Option<usize> {
-        match *self {
-            Self::O => O_LOWEST_MINO[rotation as usize][x],
-            Self::I => I_LOWEST_MINO[rotation as usize][x],
-            Self::T => T_LOWEST_MINO[rotation as usize][x],
-            Self::L => L_LOWEST_MINO[rotation as usize][x],
-            Self::J => J_LOWEST_MINO[rotation as usize][x],
-            Self::S => S_LOWEST_MINO[rotation as usize][x],
-            Self::Z => Z_LOWEST_MINO[rotation as usize][x],
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -153,6 +141,32 @@ pub struct ActivePiece {
     y: isize,
     time_existed: Duration,
     time_simulated: Duration,
+}
+
+impl ActivePiece {
+    fn lowest_mino(&self, x: usize) -> Option<usize> {
+        match self.kind {
+            Tetromino::O => O_LOWEST_MINO[self.rotation as usize][x],
+            Tetromino::I => I_LOWEST_MINO[self.rotation as usize][x],
+            Tetromino::T => T_LOWEST_MINO[self.rotation as usize][x],
+            Tetromino::L => L_LOWEST_MINO[self.rotation as usize][x],
+            Tetromino::J => J_LOWEST_MINO[self.rotation as usize][x],
+            Tetromino::S => S_LOWEST_MINO[self.rotation as usize][x],
+            Tetromino::Z => Z_LOWEST_MINO[self.rotation as usize][x],
+        }
+    }
+
+    fn bounding_box(&self, x: usize, y: usize) -> bool {
+        match self.kind {
+            Tetromino::O => O_OCCUPANCY_LUTS[self.rotation as usize][y][x],
+            Tetromino::I => I_OCCUPANCY_LUTS[self.rotation as usize][y][x],
+            Tetromino::T => T_OCCUPANCY_LUTS[self.rotation as usize][y][x],
+            Tetromino::L => L_OCCUPANCY_LUTS[self.rotation as usize][y][x],
+            Tetromino::J => J_OCCUPANCY_LUTS[self.rotation as usize][y][x],
+            Tetromino::S => S_OCCUPANCY_LUTS[self.rotation as usize][y][x],
+            Tetromino::Z => Z_OCCUPANCY_LUTS[self.rotation as usize][y][x],
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -204,6 +218,26 @@ impl GameState {
         self.matrix[y as usize][x as usize].is_none()
     }
 
+    pub fn render_matrix(&self) -> [[Option<Tetromino>; MATRIX_WIDTH]; MATRIX_HEIGHT] {
+        let mut matrix = self.matrix.clone();
+
+        for y in 0..self.active_piece.kind.bounding_box_size() {
+            for x in 0..self.active_piece.kind.bounding_box_size() {
+                if self.active_piece.bounding_box(x, y)
+                    && !GameState::out_of_bounds(
+                        self.active_piece.x + x as isize,
+                        self.active_piece.y + y as isize,
+                    )
+                {
+                    matrix[(self.active_piece.y + y as isize) as usize][(self.active_piece.x + x as isize) as usize] =
+                        Some(self.active_piece.kind);
+                }
+            }
+        }
+
+        matrix
+    }
+
     // active_piece
 
     pub fn generate_new_piece(&mut self, kind: Tetromino) {
@@ -240,11 +274,7 @@ impl GameState {
         let mut can_drop = true;
 
         for x in 0..size {
-            if let Some(y) = self
-                .active_piece
-                .kind
-                .lowest_mino(self.active_piece.rotation, x)
-            {
+            if let Some(y) = self.active_piece.lowest_mino(x) {
                 if !self.is_empty(
                     self.active_piece.x + x as isize,
                     self.active_piece.y + y as isize - 1,

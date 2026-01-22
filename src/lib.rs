@@ -8,18 +8,17 @@ use {
         ops::{Index, IndexMut},
         time::Duration,
     },
-    game_state::GamePhase,
     rand::{Rng, seq::SliceRandom},
 };
 
-pub use game_state::GameState;
+pub use game_state::*;
 
 #[derive(Debug, Clone)]
 pub struct Game<I: Input, R: Render, RNG: Rng> {
     state: GameState,
-    input: I,
-    render: R,
-    rng: RNG,
+    pub input: I,
+    pub render: R,
+    pub rng: RNG,
 }
 
 impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
