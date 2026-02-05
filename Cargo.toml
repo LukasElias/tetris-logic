@@ -2,7 +2,7 @@
 members = ["examples/ratatetris"]
 
 [package]
-name = "tetris"
+name = "tetris-logic"
 version = "0.1.0"
 edition = "2024"
 

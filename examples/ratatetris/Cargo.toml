@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-tetris = { path = "../../" }
+tetris-logic = { path = "../../" }
 ratatui = "0.30.0"
 rand = "0.9.2"

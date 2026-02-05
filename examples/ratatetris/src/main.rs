@@ -10,7 +10,7 @@ use ratatui::{
         canvas::{Canvas, Points},
     }
 };
-use tetris::{Game, GameState, Input, InputAction, Render, Tetromino};
+use tetris_logic::{Game, GameState, Input, InputAction, Render, Tetromino};
 
 fn main() {
     ratatui::run(|terminal| {
