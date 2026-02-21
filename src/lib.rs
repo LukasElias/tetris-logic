@@ -46,7 +46,7 @@ impl<I: Input, R: Render, RNG: Rng> Game<I, R, RNG> {
 
                 // Drop active piece one row and check for collisions etc...
 
-                self.state.drop();
+                self.state.try_drop();
 
                 // Enter fall state
 

@@ -7,5 +7,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-paste = "1.0.15"
 rand = { version = "0.9.2", default-features = false }

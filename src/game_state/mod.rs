@@ -114,14 +114,6 @@ impl Tetromino {
             _ => (3, 19),       // 4th col, 21st row
         }
     }
-
-    fn bounding_box_size(&self) -> usize {
-        match *self {
-            Self::O => 2,
-            Self::I => 4,
-            _ => 3,
-        }
-    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -144,28 +136,8 @@ pub struct ActivePiece {
 }
 
 impl ActivePiece {
-    fn lowest_mino(&self, x: usize) -> Option<usize> {
-        match self.kind {
-            Tetromino::O => O_LOWEST_MINO[self.rotation as usize][x],
-            Tetromino::I => I_LOWEST_MINO[self.rotation as usize][x],
-            Tetromino::T => T_LOWEST_MINO[self.rotation as usize][x],
-            Tetromino::L => L_LOWEST_MINO[self.rotation as usize][x],
-            Tetromino::J => J_LOWEST_MINO[self.rotation as usize][x],
-            Tetromino::S => S_LOWEST_MINO[self.rotation as usize][x],
-            Tetromino::Z => Z_LOWEST_MINO[self.rotation as usize][x],
-        }
-    }
-
-    fn bounding_box(&self, x: usize, y: usize) -> bool {
-        match self.kind {
-            Tetromino::O => O_OCCUPANCY_LUTS[self.rotation as usize][y][x],
-            Tetromino::I => I_OCCUPANCY_LUTS[self.rotation as usize][y][x],
-            Tetromino::T => T_OCCUPANCY_LUTS[self.rotation as usize][y][x],
-            Tetromino::L => L_OCCUPANCY_LUTS[self.rotation as usize][y][x],
-            Tetromino::J => J_OCCUPANCY_LUTS[self.rotation as usize][y][x],
-            Tetromino::S => S_OCCUPANCY_LUTS[self.rotation as usize][y][x],
-            Tetromino::Z => Z_OCCUPANCY_LUTS[self.rotation as usize][y][x],
-        }
+    fn shape(&self) -> [(isize, isize); 4] {
+        TETROMINO_SHAPES[self.kind as usize]
     }
 }
 
@@ -221,18 +193,14 @@ impl GameState {
     pub fn render_matrix(&self) -> [[Option<Tetromino>; MATRIX_WIDTH]; MATRIX_HEIGHT] {
         let mut matrix = self.matrix.clone();
 
-        for y in 0..self.active_piece.kind.bounding_box_size() {
-            for x in 0..self.active_piece.kind.bounding_box_size() {
-                if self.active_piece.bounding_box(x, y)
-                    && !GameState::out_of_bounds(
-                        self.active_piece.x + x as isize,
-                        self.active_piece.y + y as isize,
-                    )
-                {
-                    matrix[(self.active_piece.y + y as isize) as usize][(self.active_piece.x + x as isize) as usize] =
-                        Some(self.active_piece.kind);
-                }
+        for mino in self.active_piece.shape() {
+            let (x, y) = (self.active_piece.x + mino.0, self.active_piece.y + mino.1);
+
+            if GameState::out_of_bounds(x, y) {
+                continue
             }
+
+            matrix[y as usize][x as usize] = Some(self.active_piece.kind);
         }
 
         matrix
@@ -257,8 +225,18 @@ impl GameState {
         self.active_piece.time_simulated = Duration::ZERO;
     }
 
-    pub fn drop(&mut self) -> bool {
-        if self.can_drop() {
+    pub fn can_move(&self, x: isize, y: isize) -> bool {
+        for mino in self.active_piece.shape() {
+            if !self.is_empty(x + mino.0, y + mino.1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    pub fn try_drop(&mut self) -> bool {
+        if self.can_move(self.active_piece.x, self.active_piece.y - 1) {
             self.active_piece.y -= 1;
             return true;
         }
@@ -266,33 +244,12 @@ impl GameState {
         return false;
     }
 
-    pub fn can_drop(&self) -> bool {
-        // check the cells that are gonna get occupied if we drop
-
-        let size = self.active_piece.kind.bounding_box_size();
-
-        let mut can_drop = true;
-
-        for x in 0..size {
-            if let Some(y) = self.active_piece.lowest_mino(x) {
-                if !self.is_empty(
-                    self.active_piece.x + x as isize,
-                    self.active_piece.y + y as isize - 1,
-                ) {
-                    can_drop = false;
-                }
-            }
-        }
-
-        can_drop
-    }
-
     pub fn simulate_piece(&mut self, delta_time: Duration) -> bool {
         let mut on_surface = false;
         self.active_piece.time_existed += delta_time;
 
         while self.active_piece.time_existed > self.active_piece.time_simulated {
-            if !self.drop() {
+            if !self.try_drop() {
                 on_surface = true;
             }
 
