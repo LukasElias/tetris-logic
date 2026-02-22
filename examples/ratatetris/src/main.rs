@@ -10,17 +10,16 @@ use ratatui::{
         canvas::{Canvas, Points},
     }
 };
-use tetris_logic::{Game, Input, InputAction, Tetromino};
+use tetris_logic::{Game, Tetromino};
 
 fn main() {
     ratatui::run(|terminal| {
-        let input = InputDevice;
         let rng = rng();
 
-        let mut game = Game::new(input, rng);
+        let mut game = Game::new(rng);
 
         loop {
-            let state = game.tick(Duration::from_millis(50));
+            let state = game.tick(Duration::from_millis(50), None);
 
             {
                 terminal
@@ -82,12 +81,4 @@ fn main() {
             sleep(Duration::from_millis(50));
         }
     });
-}
-
-struct InputDevice;
-
-impl Input for InputDevice {
-    fn next_input(&mut self) -> Option<InputAction> {
-        None
-    }
 }

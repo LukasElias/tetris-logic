@@ -31,7 +31,7 @@ pub const FALL_TABLE: [Duration; LEVELS] = [
     Duration::from_millis(7),
 ];
 
-pub const TETROMINO_SHAPES: &[[(isize, isize); 4]; 7] = &[
+pub const TETROMINO_SHAPES: [[(isize, isize); 4]; 7] = [
     [(0, 0), (0, 1), (1, 0), (1, 1)], // O
     [(0, 2), (1, 2), (2, 2), (3, 2)], // I
     [(0, 1), (1, 1), (2, 1), (1, 2)], // T

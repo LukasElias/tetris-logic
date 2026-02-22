@@ -14,22 +14,20 @@ use {
 pub use game_state::*;
 
 #[derive(Debug, Clone)]
-pub struct Game<I: Input, RNG: Rng> {
+pub struct Game<RNG: Rng> {
     state: GameState,
-    pub input: I,
-    pub rng: RNG,
+    rng: RNG,
 }
 
-impl<I: Input, RNG: Rng> Game<I, RNG> {
-    pub fn new(input: I, rng: RNG) -> Self {
+impl<RNG: Rng> Game<RNG> {
+    pub fn new(rng: RNG) -> Self {
         Self {
             state: GameState::default(),
-            input,
             rng,
         }
     }
 
-    pub fn tick(&mut self, delta_time: Duration) -> &GameState {
+    pub fn tick(&mut self, delta_time: Duration, input: Option<InputAction>) -> &GameState {
         match self.state.phase {
             GamePhase::GenerationPhase => {
                 while self.state.space_for_bag() {
@@ -53,7 +51,7 @@ impl<I: Input, RNG: Rng> Game<I, RNG> {
             GamePhase::FallingPhase => {
                 // Handle input
 
-                match self.input.next_input() {
+                match input {
                     Some(_) => (),
                     None => (),
                 }
@@ -81,8 +79,4 @@ pub enum InputAction {
     RotateCounterclockwise,
     Hold,
     Pause,
-}
-
-pub trait Input {
-    fn next_input(&mut self) -> Option<InputAction>;
 }
