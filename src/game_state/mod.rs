@@ -125,6 +125,38 @@ pub enum Rotation {
     West,
 }
 
+impl Rotation {
+    pub fn clockwise(&self) -> Self {
+        match *self {
+            Self::North => Self::East,
+            Self::East => Self::South,
+            Self::South => Self::West,
+            Self::West => Self::North,
+        }
+    }
+
+    pub fn counter_clockwise(&self) -> Self {
+        match *self {
+            Self::North => Self::West,
+            Self::East => Self::North,
+            Self::South => Self::East,
+            Self::West => Self::South,
+        }
+    }
+
+    pub fn rotate(&self, clockwise: bool) -> Self {
+        if clockwise {
+            self.clockwise()
+        } else {
+            self.counter_clockwise()
+        }
+    }
+
+    fn kick_table_index(&self, clockwise: bool) -> usize {
+        (*self as usize * 2 + 8 - !clockwise as usize) % 8
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ActivePiece {
     kind: Tetromino,
@@ -136,8 +168,12 @@ pub struct ActivePiece {
 }
 
 impl ActivePiece {
-    fn shape(&self) -> [(isize, isize); 4] {
+    pub fn shape(&self) -> [(isize, isize); 4] {
         TETROMINO_SHAPES[self.rotation as usize][self.kind as usize]
+    }
+
+    pub fn shape_rotation(&self, rotation: Rotation) -> [(isize, isize); 4] {
+        TETROMINO_SHAPES[rotation as usize][self.kind as usize]
     }
 }
 
@@ -226,13 +262,17 @@ impl GameState {
     }
 
     pub fn can_move(&self, x: isize, y: isize) -> bool {
-        for mino in self.active_piece.shape() {
+        self.can_move_rotation(x, y, self.active_piece.rotation)
+    }
+
+    pub fn can_move_rotation(&self, x: isize, y: isize, rotation: Rotation) -> bool {
+        for mino in self.active_piece.shape_rotation(rotation) {
             if !self.is_empty(x + mino.0, y + mino.1) {
                 return false;
             }
         }
 
-        return true;
+        true
     }
 
     pub fn try_drop(&mut self) -> bool {
@@ -257,6 +297,48 @@ impl GameState {
         }
 
         on_surface
+    }
+
+    pub fn can_rotate(&self, clockwise: bool) -> Option<(isize, isize)> {
+        // This method returns if you can rotate, and what kick you should do in SRS
+
+        match self.active_piece.kind {
+            Tetromino::O => Some((0, 0)),
+            Tetromino::I => {
+                let kick_table = I_WALL_KICK_TABLE[self.active_piece.rotation.kick_table_index(clockwise)];
+
+                for kick in kick_table {
+                    if self.can_move_rotation(self.active_piece.x + kick.0, self.active_piece.y + kick.1, self.active_piece.rotation.rotate(clockwise)) {
+                        return Some(kick);
+                    }
+                }
+
+                None
+            },
+            _ => {
+                let kick_table = JLSTZ_WALL_KICK_TABLE[self.active_piece.rotation.kick_table_index(clockwise)];
+
+                for kick in kick_table {
+                    if self.can_move_rotation(self.active_piece.x + kick.0, self.active_piece.y + kick.1, self.active_piece.rotation.rotate(clockwise)) {
+                        return Some(kick);
+                    }
+                }
+
+                None
+            },
+        }
+    }
+
+    pub fn try_rotate(&mut self, clockwise: bool) -> bool {
+        if let Some(kick) = self.can_rotate(clockwise) {
+            self.active_piece.rotation = self.active_piece.rotation.rotate(clockwise);
+            self.active_piece.x += kick.0;
+            self.active_piece.y += kick.1;
+
+            return true;
+        }
+
+        false
     }
 
     // score

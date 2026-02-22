@@ -49,19 +49,22 @@ impl<RNG: Rng> Game<RNG> {
                 self.state.phase = GamePhase::FallingPhase;
             }
             GamePhase::FallingPhase => {
-                // Handle input
+                // TODO: Handle input
 
                 match input {
+                    Some(InputAction::RotateClockwise) => { self.state.try_rotate(true); },
+                    Some(InputAction::RotateCounterclockwise) => { self.state.try_rotate(false); },
                     Some(_) => (),
                     None => (),
                 }
 
-                // Try to drop and enter lock phase if hit ground
+                // TODO: Try to drop and enter lock phase if hit ground
 
                 if self.state.simulate_piece(delta_time) {
                     self.state.phase = GamePhase::LockPhase;
                 }
             }
+            // TODO: finish all the GamePhases
             _ => (),
         }
 
