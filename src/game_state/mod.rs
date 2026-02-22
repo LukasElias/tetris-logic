@@ -119,10 +119,10 @@ impl Tetromino {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Rotation {
     #[default]
-    North = 0,
-    East = 1,
-    South = 2,
-    West = 3,
+    North,
+    East,
+    South,
+    West,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -137,7 +137,7 @@ pub struct ActivePiece {
 
 impl ActivePiece {
     fn shape(&self) -> [(isize, isize); 4] {
-        TETROMINO_SHAPES[self.kind as usize]
+        TETROMINO_SHAPES[self.rotation as usize][self.kind as usize]
     }
 }
 
