@@ -81,5 +81,4 @@ pub enum InputAction {
     RotateClockwise,
     RotateCounterclockwise,
     Hold,
-    Pause,
 }
