@@ -28,8 +28,8 @@ impl<RNG: Rng> Game<RNG> {
     }
 
     pub fn render_tick<INPUT>(&mut self, delta_time: Duration, inputs: INPUT) -> &GameState
-    where 
-        INPUT: IntoIterator<Item = Input>
+    where
+        INPUT: IntoIterator<Item = Input>,
     {
         let mut total_time = Duration::ZERO;
 
@@ -72,8 +72,12 @@ impl<RNG: Rng> Game<RNG> {
                 // TODO: Handle input
 
                 match input {
-                    Some(InputAction::RotateClockwise) => { self.state.try_rotate(true); },
-                    Some(InputAction::RotateCounterclockwise) => { self.state.try_rotate(false); },
+                    Some(InputAction::RotateClockwise) => {
+                        self.state.try_rotate(true);
+                    }
+                    Some(InputAction::RotateCounterclockwise) => {
+                        self.state.try_rotate(false);
+                    }
                     Some(_) => (),
                     None => (),
                 }
@@ -99,10 +103,7 @@ pub struct Input {
 
 impl Input {
     pub fn new(action: InputAction, time_stamp: Duration) -> Self {
-        Self {
-            action,
-            time_stamp,
-        }
+        Self { action, time_stamp }
     }
 }
 

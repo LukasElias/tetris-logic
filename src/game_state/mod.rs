@@ -233,7 +233,7 @@ impl GameState {
             let (x, y) = (self.active_piece.x + mino.0, self.active_piece.y + mino.1);
 
             if GameState::out_of_bounds(x, y) {
-                continue
+                continue;
             }
 
             matrix[y as usize][x as usize] = Some(self.active_piece.kind);
@@ -305,27 +305,37 @@ impl GameState {
         match self.active_piece.kind {
             Tetromino::O => Some((0, 0)),
             Tetromino::I => {
-                let kick_table = I_WALL_KICK_TABLE[self.active_piece.rotation.kick_table_index(clockwise)];
+                let kick_table =
+                    I_WALL_KICK_TABLE[self.active_piece.rotation.kick_table_index(clockwise)];
 
                 for kick in kick_table {
-                    if self.can_move_rotation(self.active_piece.x + kick.0, self.active_piece.y + kick.1, self.active_piece.rotation.rotate(clockwise)) {
+                    if self.can_move_rotation(
+                        self.active_piece.x + kick.0,
+                        self.active_piece.y + kick.1,
+                        self.active_piece.rotation.rotate(clockwise),
+                    ) {
                         return Some(kick);
                     }
                 }
 
                 None
-            },
+            }
             _ => {
-                let kick_table = JLSTZ_WALL_KICK_TABLE[self.active_piece.rotation.kick_table_index(clockwise)];
+                let kick_table =
+                    JLSTZ_WALL_KICK_TABLE[self.active_piece.rotation.kick_table_index(clockwise)];
 
                 for kick in kick_table {
-                    if self.can_move_rotation(self.active_piece.x + kick.0, self.active_piece.y + kick.1, self.active_piece.rotation.rotate(clockwise)) {
+                    if self.can_move_rotation(
+                        self.active_piece.x + kick.0,
+                        self.active_piece.y + kick.1,
+                        self.active_piece.rotation.rotate(clockwise),
+                    ) {
                         return Some(kick);
                     }
                 }
 
                 None
-            },
+            }
         }
     }
 

@@ -1,16 +1,17 @@
-use std::{
-    thread::sleep,
-    time::{Duration, Instant},
-};
+use std::time::{Duration, Instant};
 
 use color_eyre::eyre::Result;
 use crossterm::event::{self, KeyCode};
 use rand::rng;
 use ratatui::{
-    DefaultTerminal, Frame, macros::{horizontal, vertical}, style::Color, symbols::Marker, widgets::{
+    DefaultTerminal, Frame,
+    macros::{horizontal, vertical},
+    style::Color,
+    symbols::Marker,
+    widgets::{
         Block,
         canvas::{Canvas, Points},
-    }
+    },
 };
 use tetris_logic::{Game, GameState, Input, InputAction, Tetromino};
 
@@ -36,8 +37,14 @@ fn run(terminal: &mut DefaultTerminal) -> Result<()> {
                 if let Some(key) = event::read()?.as_key_press_event() {
                     match key.code {
                         KeyCode::Char('q') => return Ok(()),
-                        KeyCode::Up => inputs.push(Input::new(InputAction::RotateClockwise, last_update.elapsed())),
-                        KeyCode::Char('z') => inputs.push(Input::new(InputAction::RotateCounterclockwise, last_update.elapsed())),
+                        KeyCode::Up => inputs.push(Input::new(
+                            InputAction::RotateClockwise,
+                            last_update.elapsed(),
+                        )),
+                        KeyCode::Char('z') => inputs.push(Input::new(
+                            InputAction::RotateCounterclockwise,
+                            last_update.elapsed(),
+                        )),
                         _ => (),
                     }
                 }
@@ -102,8 +109,5 @@ fn render(frame: &mut Frame, state: &GameState) {
     let area = horizontal.areas::<3>(frame.area())[1];
     let area = vertical.areas::<3>(area)[1];
 
-    frame.render_widget(
-        canvas,
-        area,
-    );
+    frame.render_widget(canvas, area);
 }
