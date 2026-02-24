@@ -22,49 +22,47 @@ fn main() -> Result<()> {
 }
 
 fn run(terminal: &mut DefaultTerminal) -> Result<()> {
-    {
-        let rng = rng();
+    let rng = rng();
 
-        let mut game = Game::new(rng);
+    let mut game = Game::new(rng);
 
-        let mut last_update = Instant::now();
+    let mut last_update = Instant::now();
 
-        loop {
-            // Input handling
+    loop {
+        // Input handling
 
-            let mut inputs: Vec<Input> = Vec::new();
-            if event::poll(Duration::ZERO)? {
-                if let Some(key) = event::read()?.as_key_press_event() {
-                    match key.code {
-                        KeyCode::Char('q') => return Ok(()),
-                        KeyCode::Left => {
-                            inputs.push(Input::new(InputAction::Left, last_update.elapsed()))
-                        }
-                        KeyCode::Right => {
-                            inputs.push(Input::new(InputAction::Right, last_update.elapsed()))
-                        }
-                        KeyCode::Up => inputs.push(Input::new(
-                            InputAction::RotateClockwise,
-                            last_update.elapsed(),
-                        )),
-                        KeyCode::Char('z') => inputs.push(Input::new(
-                            InputAction::RotateCounterclockwise,
-                            last_update.elapsed(),
-                        )),
-                        _ => (),
+        let mut inputs: Vec<Input> = Vec::new();
+        if event::poll(Duration::ZERO)? {
+            if let Some(key) = event::read()?.as_key_press_event() {
+                match key.code {
+                    KeyCode::Char('q') => return Ok(()),
+                    KeyCode::Left => {
+                        inputs.push(Input::new(InputAction::Left, last_update.elapsed()))
                     }
+                    KeyCode::Right => {
+                        inputs.push(Input::new(InputAction::Right, last_update.elapsed()))
+                    }
+                    KeyCode::Up => inputs.push(Input::new(
+                        InputAction::RotateClockwise,
+                        last_update.elapsed(),
+                    )),
+                    KeyCode::Char('z') => inputs.push(Input::new(
+                        InputAction::RotateCounterclockwise,
+                        last_update.elapsed(),
+                    )),
+                    _ => (),
                 }
             }
-
-            let state = game.render_tick(last_update.elapsed(), inputs);
-            last_update = Instant::now();
-
-            // Rendering
-
-            terminal
-                .draw(|frame| render(frame, state))
-                .expect("it's probably fine");
         }
+
+        let state = game.render_tick(last_update.elapsed(), inputs);
+        last_update = Instant::now();
+
+        // Rendering
+
+        terminal
+            .draw(|frame| render(frame, state))
+            .expect("it's probably fine");
     }
 }
 
@@ -72,8 +70,8 @@ fn render(frame: &mut Frame, state: &GameState) {
     let canvas = Canvas::default()
         .block(Block::bordered().title("Tetris"))
         .marker(Marker::HalfBlock)
-        .x_bounds([0.0, 10.0])
-        .y_bounds([0.0, 20.0])
+        .x_bounds([0.0, 9.0])
+        .y_bounds([0.0, 19.0])
         .paint(|ctx| {
             let mut o_points = vec![];
             let mut i_points = vec![];
@@ -109,8 +107,8 @@ fn render(frame: &mut Frame, state: &GameState) {
             ctx.draw(&Points::new(z_points.as_slice(), Color::Red));
         });
 
-    let horizontal = horizontal![*=1, ==10, *=1];
-    let vertical = vertical![*=1, ==10, *=1];
+    let horizontal = horizontal![*=1, ==12, *=1];
+    let vertical = vertical![*=1, ==12, *=1];
 
     let area = horizontal.areas::<3>(frame.area())[1];
     let area = vertical.areas::<3>(area)[1];
