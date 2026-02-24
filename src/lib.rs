@@ -27,7 +27,27 @@ impl<RNG: Rng> Game<RNG> {
         }
     }
 
-    pub fn tick(&mut self, delta_time: Duration, input: Option<InputAction>) -> &GameState {
+    pub fn render_tick<INPUT>(&mut self, delta_time: Duration, inputs: INPUT) -> &GameState
+    where 
+        INPUT: IntoIterator<Item = Input>
+    {
+        let mut total_time = Duration::ZERO;
+
+        for input in inputs {
+            self.update_tick(input.time_stamp, Some(input.action));
+            total_time += input.time_stamp;
+        }
+
+        if total_time < delta_time {
+            self.update_tick(delta_time - total_time, None);
+        } else if total_time > delta_time {
+            panic!("The input time_stamps exceeded the time since last frame");
+        }
+
+        &self.state
+    }
+
+    pub fn update_tick(&mut self, delta_time: Duration, input: Option<InputAction>) -> &GameState {
         match self.state.phase {
             GamePhase::GenerationPhase => {
                 while self.state.space_for_bag() {
@@ -69,6 +89,20 @@ impl<RNG: Rng> Game<RNG> {
         }
 
         &self.state
+    }
+}
+
+pub struct Input {
+    pub action: InputAction,
+    pub time_stamp: Duration,
+}
+
+impl Input {
+    pub fn new(action: InputAction, time_stamp: Duration) -> Self {
+        Self {
+            action,
+            time_stamp,
+        }
     }
 }
 
