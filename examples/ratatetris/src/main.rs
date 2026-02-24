@@ -37,6 +37,12 @@ fn run(terminal: &mut DefaultTerminal) -> Result<()> {
                 if let Some(key) = event::read()?.as_key_press_event() {
                     match key.code {
                         KeyCode::Char('q') => return Ok(()),
+                        KeyCode::Left => {
+                            inputs.push(Input::new(InputAction::Left, last_update.elapsed()))
+                        }
+                        KeyCode::Right => {
+                            inputs.push(Input::new(InputAction::Right, last_update.elapsed()))
+                        }
                         KeyCode::Up => inputs.push(Input::new(
                             InputAction::RotateClockwise,
                             last_update.elapsed(),

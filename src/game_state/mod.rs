@@ -275,9 +275,10 @@ impl GameState {
         true
     }
 
-    pub fn try_drop(&mut self) -> bool {
-        if self.can_move(self.active_piece.x, self.active_piece.y - 1) {
-            self.active_piece.y -= 1;
+    pub fn try_move(&mut self, x: isize, y: isize) -> bool {
+        if self.can_move(self.active_piece.x + x, self.active_piece.y + y) {
+            self.active_piece.x += x;
+            self.active_piece.y += y;
             return true;
         }
 
@@ -289,7 +290,7 @@ impl GameState {
         self.active_piece.time_existed += delta_time;
 
         while self.active_piece.time_existed > self.active_piece.time_simulated {
-            if !self.try_drop() {
+            if !self.try_move(0, -1) {
                 on_surface = true;
             }
 

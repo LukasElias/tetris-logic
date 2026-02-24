@@ -62,7 +62,7 @@ impl<RNG: Rng> Game<RNG> {
 
                 // Drop active piece one row and check for collisions etc...
 
-                self.state.try_drop();
+                self.state.try_move(0, -1);
 
                 // Enter fall state
 
@@ -72,6 +72,12 @@ impl<RNG: Rng> Game<RNG> {
                 // TODO: Handle input
 
                 match input {
+                    Some(InputAction::Left) => {
+                        self.state.try_move(-1, 0);
+                    }
+                    Some(InputAction::Right) => {
+                        self.state.try_move(1, 0);
+                    }
                     Some(InputAction::RotateClockwise) => {
                         self.state.try_rotate(true);
                     }
