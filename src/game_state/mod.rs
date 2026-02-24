@@ -159,12 +159,12 @@ impl Rotation {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ActivePiece {
-    kind: Tetromino,
-    rotation: Rotation,
-    x: isize,
-    y: isize,
-    time_existed: Duration,
-    time_simulated: Duration,
+    pub kind: Tetromino,
+    pub rotation: Rotation,
+    pub x: isize,
+    pub y: isize,
+    pub time_existed: Duration,
+    pub time_simulated: Duration,
 }
 
 impl ActivePiece {
