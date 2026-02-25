@@ -185,6 +185,7 @@ pub struct GameState {
     pub piece_queue: RingBuffer<Tetromino, PIECE_QUEUE_SIZE>,
     pub matrix: [[Option<Tetromino>; MATRIX_WIDTH]; MATRIX_HEIGHT],
     pub active_piece: ActivePiece,
+    pub lockdown_timer: Duration,
     pub score: usize,
     pub lines: usize,
     pub level: usize,
@@ -353,6 +354,22 @@ impl GameState {
         false
     }
 
+    // lockdown_timer
+
+    pub fn reset_lockdown_timer(&mut self) {
+        self.lockdown_timer = LOCKDOWN_TIME;
+    }
+
+    pub fn lockdown(&mut self) {
+        for mino in self.active_piece.shape() {
+            let (x, y) = ((self.active_piece.x + mino.0) as usize, (self.active_piece.y + mino.1) as usize);
+
+            self.matrix[y][x] = Some(self.active_piece.kind);
+        }
+
+        self.can_hold = true;
+    }
+
     // score
 
     // lines
@@ -391,6 +408,7 @@ impl Default for GameState {
             piece_queue: RingBuffer::new(),
             matrix: [[None; MATRIX_WIDTH]; MATRIX_HEIGHT],
             active_piece: active_piece,
+            lockdown_timer: Duration::ZERO,
             score: 0,
             lines: 0,
             level: 1,

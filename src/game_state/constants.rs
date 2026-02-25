@@ -1,5 +1,6 @@
 use crate::{Duration, game_state::Tetromino};
 
+pub const LOCKDOWN_TIME: Duration = Duration::from_millis(500);
 pub const PIECE_QUEUE_SIZE: usize = 14;
 pub const MATRIX_WIDTH: usize = 10;
 pub const MATRIX_HEIGHT: usize = 20;

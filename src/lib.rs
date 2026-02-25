@@ -106,13 +106,20 @@ impl<RNG: Rng> Game<RNG> {
                     _ => (),
                 }
 
-                // TODO: When it locks down in lock phase, it should set self.state.can_hold = true;
-
                 // TODO: Try to drop and enter lock phase if hit ground
 
                 if self.state.simulate_piece(delta_time) {
                     self.state.phase = GamePhase::LockPhase;
                 }
+            }
+            GamePhase::LockPhase => {
+                if self.state.lockdown_timer == Duration::ZERO {
+                    self.state.reset_lockdown_timer();
+                }
+
+                // Lock down
+                self.state.lockdown();
+                self.state.phase = GamePhase::PatternPhase;
             }
             // TODO: finish all the GamePhases
             _ => (),
