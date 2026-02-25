@@ -56,7 +56,19 @@ impl<RNG: Rng> Game<RNG> {
 
                 // Generate a piece
 
-                let piece = self.state.piece_queue.pop();
+                let piece: Tetromino;
+
+                if !self.state.can_hold {
+                    if let Some(hold_piece) = self.state.hold_piece {
+                        piece = hold_piece;
+                    } else {
+                        piece = self.state.piece_queue.pop();
+                    }
+
+                    self.state.hold_piece = Some(piece);
+                } else {
+                    piece = self.state.piece_queue.pop();
+                }
 
                 self.state.generate_new_piece(piece);
 
@@ -84,9 +96,17 @@ impl<RNG: Rng> Game<RNG> {
                     Some(InputAction::RotateCounterclockwise) => {
                         self.state.try_rotate(false);
                     }
-                    Some(_) => (),
-                    None => (),
+                    Some(InputAction::Hold) => {
+                        if self.state.can_hold {
+                            self.state.can_hold = false;
+
+                            self.state.phase = GamePhase::GenerationPhase;
+                        }
+                    }
+                    _ => (),
                 }
+
+                // TODO: When it locks down in lock phase, it should set self.state.can_hold = true;
 
                 // TODO: Try to drop and enter lock phase if hit ground
 

@@ -181,6 +181,7 @@ impl ActivePiece {
 pub struct GameState {
     pub phase: GamePhase,
     pub hold_piece: Option<Tetromino>,
+    pub can_hold: bool,
     pub piece_queue: RingBuffer<Tetromino, PIECE_QUEUE_SIZE>,
     pub matrix: [[Option<Tetromino>; MATRIX_WIDTH]; MATRIX_HEIGHT],
     pub active_piece: ActivePiece,
@@ -386,6 +387,7 @@ impl Default for GameState {
         Self {
             phase: GamePhase::default(),
             hold_piece: None,
+            can_hold: true,
             piece_queue: RingBuffer::new(),
             matrix: [[None; MATRIX_WIDTH]; MATRIX_HEIGHT],
             active_piece: active_piece,

@@ -50,6 +50,10 @@ fn run(terminal: &mut DefaultTerminal) -> Result<()> {
                         InputAction::RotateCounterclockwise,
                         last_update.elapsed(),
                     )),
+                    KeyCode::Char('c') => inputs.push(Input::new(
+                        InputAction::Hold,
+                        last_update.elapsed(),
+                    )),
                     _ => (),
                 }
             }
