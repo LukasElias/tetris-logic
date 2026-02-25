@@ -17,6 +17,7 @@ pub use game_state::*;
 pub struct Game<RNG: Rng> {
     state: GameState,
     rng: RNG,
+    settings: Settings,
 }
 
 impl<RNG: Rng> Game<RNG> {
@@ -24,7 +25,14 @@ impl<RNG: Rng> Game<RNG> {
         Self {
             state: GameState::default(),
             rng,
+            settings: Settings::default(),
         }
+    }
+
+    pub fn settings(mut self, settings: Settings) -> Self {
+        self.settings = settings;
+
+        self
     }
 
     pub fn render_tick<INPUT>(&mut self, delta_time: Duration, inputs: INPUT) -> &GameState
@@ -129,6 +137,7 @@ impl<RNG: Rng> Game<RNG> {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Input {
     pub action: InputAction,
     pub time_stamp: Duration,
@@ -149,4 +158,17 @@ pub enum InputAction {
     RotateClockwise,
     RotateCounterclockwise,
     Hold,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct Settings {
+    lockdown: LockdownRules,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum LockdownRules {
+    #[default]
+    ExtendedPlacementLockDown,
+    InfinitePlacementLockDown,
+    ClassicLockDown,
 }

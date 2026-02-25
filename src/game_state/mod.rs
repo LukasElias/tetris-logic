@@ -362,7 +362,10 @@ impl GameState {
 
     pub fn lockdown(&mut self) {
         for mino in self.active_piece.shape() {
-            let (x, y) = ((self.active_piece.x + mino.0) as usize, (self.active_piece.y + mino.1) as usize);
+            let (x, y) = (
+                (self.active_piece.x + mino.0) as usize,
+                (self.active_piece.y + mino.1) as usize,
+            );
 
             self.matrix[y][x] = Some(self.active_piece.kind);
         }
