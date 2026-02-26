@@ -121,13 +121,30 @@ impl<RNG: Rng> Game<RNG> {
                 }
             }
             GamePhase::LockPhase => {
-                if self.state.lockdown_timer == Duration::ZERO {
-                    self.state.reset_lockdown_timer();
+                // Set the timer if not set yet
+                if self.state.active_piece.lockdown_timer.is_none() {
+                    self.state.active_piece.reset_lockdown_timer();
                 }
 
-                // Lock down
-                self.state.lockdown();
-                self.state.phase = GamePhase::PatternPhase;
+                // TODO: Implement the three drop rules
+                match self.settings.lockdown {
+                    LockdownRules::ExtendedPlacementLockDown => {
+                    }
+                    LockdownRules::InfinitePlacementLockDown => {
+                    }
+                    LockdownRules::ClassicLockDown => {
+                    }
+                }
+
+                // Increment timer
+                self.state.active_piece.increment_lockdown_timer(delta_time);
+
+                // Check if timer is done
+                if self.state.active_piece.is_lockdown_timer_done() {
+                    // lock down piece
+                    self.state.lockdown();
+                    self.state.phase = GamePhase::PatternPhase;
+                }
             }
             // TODO: finish all the GamePhases
             _ => (),

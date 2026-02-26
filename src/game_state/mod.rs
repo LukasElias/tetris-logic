@@ -165,6 +165,7 @@ pub struct ActivePiece {
     pub y: isize,
     pub time_existed: Duration,
     pub time_simulated: Duration,
+    pub lockdown_timer: Option<Duration>,
 }
 
 impl ActivePiece {
@@ -174,6 +175,22 @@ impl ActivePiece {
 
     pub fn shape_rotation(&self, rotation: Rotation) -> [(isize, isize); 4] {
         TETROMINO_SHAPES[rotation as usize][self.kind as usize]
+    }
+
+    pub fn reset_lockdown_timer(&mut self) {
+        self.lockdown_timer = Some(Duration::from_millis(0));
+    }
+
+    pub fn increment_lockdown_timer(&mut self, time: Duration) {
+        *self.lockdown_timer.as_mut().unwrap() += time;
+    }
+
+    pub fn is_lockdown_timer_done(&self) -> bool {
+        if let Some(timer) = self.lockdown_timer {
+            timer >= LOCKDOWN_TIME
+        } else {
+            false
+        }
     }
 }
 
@@ -185,7 +202,6 @@ pub struct GameState {
     pub piece_queue: RingBuffer<Tetromino, PIECE_QUEUE_SIZE>,
     pub matrix: [[Option<Tetromino>; MATRIX_WIDTH]; MATRIX_HEIGHT],
     pub active_piece: ActivePiece,
-    pub lockdown_timer: Duration,
     pub score: usize,
     pub lines: usize,
     pub level: usize,
@@ -354,11 +370,7 @@ impl GameState {
         false
     }
 
-    // lockdown_timer
-
-    pub fn reset_lockdown_timer(&mut self) {
-        self.lockdown_timer = LOCKDOWN_TIME;
-    }
+    // lockdown
 
     pub fn lockdown(&mut self) {
         for mino in self.active_piece.shape() {
@@ -402,6 +414,7 @@ impl Default for GameState {
             y: 0,
             time_existed: Duration::ZERO,
             time_simulated: Duration::ZERO,
+            lockdown_timer: None,
         };
 
         Self {
@@ -411,7 +424,6 @@ impl Default for GameState {
             piece_queue: RingBuffer::new(),
             matrix: [[None; MATRIX_WIDTH]; MATRIX_HEIGHT],
             active_piece: active_piece,
-            lockdown_timer: Duration::ZERO,
             score: 0,
             lines: 0,
             level: 1,
