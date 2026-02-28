@@ -114,8 +114,6 @@ impl<RNG: Rng> Game<RNG> {
                     _ => (),
                 }
 
-                // TODO: Try to drop and enter lock phase if hit ground
-
                 if self.state.simulate_piece(delta_time) {
                     self.state.phase = GamePhase::LockPhase;
                 }
@@ -145,6 +143,38 @@ impl<RNG: Rng> Game<RNG> {
                     self.state.lockdown();
                     self.state.phase = GamePhase::PatternPhase;
                 }
+            }
+            GamePhase::PatternPhase => {
+                for mino in self.state.active_piece.shape() {
+                    if self.state.hit_list[mino.1 as usize].is_some() {
+                        continue
+                    }
+
+                    if self.state.line_completed((self.state.active_piece.y + mino.1) as usize) {
+                        self.state.hit_list[3 - mino.1 as usize] = Some((self.state.active_piece.y + mino.1) as usize);
+                    }
+                }
+
+                self.state.phase = GamePhase::EliminatePhase;
+            }
+            GamePhase::EliminatePhase => {
+                // TODO: Optimize this thing
+
+                for line in &mut self.state.hit_list {
+                    if line.is_none() {
+                        continue;
+                    }
+
+                    for y in line.unwrap()..self.state.matrix.len() {
+                        let new_line = self.state.matrix.get(y + 1).unwrap_or(&[None; 10]);
+
+                        self.state.matrix[y] = *new_line;
+                    }
+
+                    *line = None;
+                }
+
+                self.state.phase = GamePhase::GenerationPhase;
             }
             // TODO: finish all the GamePhases
             _ => (),

@@ -205,6 +205,7 @@ pub struct GameState {
     pub score: usize,
     pub lines: usize,
     pub level: usize,
+    pub hit_list: [Option<usize>; 4],
 }
 
 impl GameState {
@@ -258,6 +259,16 @@ impl GameState {
         }
 
         matrix
+    }
+
+    pub fn line_completed(&self, y: usize) -> bool {
+        for x in 0..MATRIX_WIDTH {
+            if self.matrix[y][x].is_none() {
+                return false
+            }
+        }
+
+        true
     }
 
     // active_piece
@@ -427,6 +438,7 @@ impl Default for GameState {
             score: 0,
             lines: 0,
             level: 1,
+            hit_list: [None; 4],
         }
     }
 }
