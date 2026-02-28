@@ -264,7 +264,7 @@ impl GameState {
     pub fn line_completed(&self, y: usize) -> bool {
         for x in 0..MATRIX_WIDTH {
             if self.matrix[y][x].is_none() {
-                return false
+                return false;
             }
         }
 

@@ -73,7 +73,7 @@ impl<RNG: Rng> Game<RNG> {
                         piece = self.state.piece_queue.pop();
                     }
 
-                    self.state.hold_piece = Some(piece);
+                    self.state.hold_piece = Some(self.state.active_piece.kind);
                 } else {
                     piece = self.state.piece_queue.pop();
                 }
@@ -126,12 +126,9 @@ impl<RNG: Rng> Game<RNG> {
 
                 // TODO: Implement the three drop rules
                 match self.settings.lockdown {
-                    LockdownRules::ExtendedPlacementLockDown => {
-                    }
-                    LockdownRules::InfinitePlacementLockDown => {
-                    }
-                    LockdownRules::ClassicLockDown => {
-                    }
+                    LockdownRules::ExtendedPlacementLockDown => {}
+                    LockdownRules::InfinitePlacementLockDown => {}
+                    LockdownRules::ClassicLockDown => {}
                 }
 
                 // Increment timer
@@ -147,11 +144,15 @@ impl<RNG: Rng> Game<RNG> {
             GamePhase::PatternPhase => {
                 for mino in self.state.active_piece.shape() {
                     if self.state.hit_list[mino.1 as usize].is_some() {
-                        continue
+                        continue;
                     }
 
-                    if self.state.line_completed((self.state.active_piece.y + mino.1) as usize) {
-                        self.state.hit_list[3 - mino.1 as usize] = Some((self.state.active_piece.y + mino.1) as usize);
+                    if self
+                        .state
+                        .line_completed((self.state.active_piece.y + mino.1) as usize)
+                    {
+                        self.state.hit_list[3 - mino.1 as usize] =
+                            Some((self.state.active_piece.y + mino.1) as usize);
                     }
                 }
 
