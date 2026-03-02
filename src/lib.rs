@@ -137,8 +137,11 @@ impl<RNG: Rng> Game<RNG> {
                 // Check if timer is done
                 if self.state.active_piece.is_lockdown_timer_done() {
                     // lock down piece
-                    self.state.lockdown();
-                    self.state.phase = GamePhase::PatternPhase;
+                    if !self.state.try_lockdown() {
+                        self.state.phase = GamePhase::GameOver;
+                    } else {
+                        self.state.phase = GamePhase::PatternPhase;
+                    }
                 }
             }
             GamePhase::PatternPhase => {

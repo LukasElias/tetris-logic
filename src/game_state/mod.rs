@@ -14,6 +14,7 @@ pub enum GamePhase {
     // AnimationPhase,
     EliminatePhase,
     CompletionPhase,
+    GameOver,
 }
 
 #[derive(Debug, Clone)]
@@ -383,17 +384,21 @@ impl GameState {
 
     // lockdown
 
-    pub fn lockdown(&mut self) {
+    pub fn try_lockdown(&mut self) -> bool {
+        // TODO: Make the game over thing a bit more complex with all the rules. Also if some of the matrix has already been written to remove that ig.
         for mino in self.active_piece.shape() {
-            let (x, y) = (
-                (self.active_piece.x + mino.0) as usize,
-                (self.active_piece.y + mino.1) as usize,
-            );
+            let (x, y) = (self.active_piece.x + mino.0, self.active_piece.y + mino.1);
 
-            self.matrix[y][x] = Some(self.active_piece.kind);
+            if Self::out_of_bounds(x, y) {
+                return false;
+            }
+
+            self.matrix[y as usize][x as usize] = Some(self.active_piece.kind);
         }
 
         self.can_hold = true;
+
+        true
     }
 
     // score
