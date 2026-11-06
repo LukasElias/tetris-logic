@@ -41,17 +41,17 @@ The library roughly works like this:
 
 ## TODO List
 
-[ ] Add ARR (Automatic Repeat Rate) and DAS (Delayed Auto Shift)
-[ ] Add a buffer zone and implement the ways you can lose
-[ ] Split the engine into multiple modular parts so I can implement multiple rules
-[ ] Lock phase / lockdown rules
-[ ] Ghost piece
-[ ] Hard drop
-[ ] Soft drop
-[ ] Completion phase
-[ ] Make the board size customizable at compile time
-[ ] Make a std feature
-[ ] Make the board size customizable at runtime if an allocator is provided
-[ ] FFI
-[ ] Make more examples
-[ ] Make the nix flake nicer to use, and add a nix run command with a ratatui example
+- [ ] Add ARR (Automatic Repeat Rate) and DAS (Delayed Auto Shift)
+- [ ] Add a buffer zone and implement the ways you can lose
+- [ ] Split the engine into multiple modular parts so I can implement multiple rules
+- [ ] Lock phase / lockdown rules
+- [ ] Ghost piece
+- [ ] Hard drop
+- [ ] Soft drop
+- [ ] Completion phase
+- [ ] Make the board size customizable at compile time
+- [ ] Make a std feature
+- [ ] Make the board size customizable at runtime if an allocator is provided
+- [ ] FFI
+- [ ] Make more examples
+- [ ] Make the nix flake nicer to use, and add a nix run command with a ratatui example
