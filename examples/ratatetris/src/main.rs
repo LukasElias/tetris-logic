@@ -37,21 +37,21 @@ fn run(terminal: &mut DefaultTerminal) -> Result<()> {
                 match key.code {
                     KeyCode::Char('q') => return Ok(()),
                     KeyCode::Left => {
-                        inputs.push(Input::new(InputAction::Left, last_update.elapsed()))
+                        inputs.push(Input::press(InputAction::Left, last_update.elapsed()))
                     }
                     KeyCode::Right => {
-                        inputs.push(Input::new(InputAction::Right, last_update.elapsed()))
+                        inputs.push(Input::press(InputAction::Right, last_update.elapsed()))
                     }
-                    KeyCode::Up => inputs.push(Input::new(
+                    KeyCode::Up => inputs.push(Input::press(
                         InputAction::RotateClockwise,
                         last_update.elapsed(),
                     )),
-                    KeyCode::Char('z') => inputs.push(Input::new(
+                    KeyCode::Char('z') => inputs.push(Input::press(
                         InputAction::RotateCounterclockwise,
                         last_update.elapsed(),
                     )),
                     KeyCode::Char('c') => {
-                        inputs.push(Input::new(InputAction::Hold, last_update.elapsed()))
+                        inputs.push(Input::press(InputAction::Hold, last_update.elapsed()))
                     }
                     _ => (),
                 }

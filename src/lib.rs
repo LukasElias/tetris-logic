@@ -16,6 +16,7 @@ pub use game_state::*;
 #[derive(Debug, Clone)]
 pub struct Game<RNG: Rng> {
     state: GameState,
+    input_action_states: InputActionStates,
     rng: RNG,
     settings: Settings,
 }
@@ -25,6 +26,7 @@ impl<RNG: Rng> Game<RNG> {
         Self {
             state: GameState::default(),
             rng,
+            input_action_states: InputActionStates::default(),
             settings: Settings::default(),
         }
     }
@@ -42,7 +44,46 @@ impl<RNG: Rng> Game<RNG> {
         let mut total_time = Duration::ZERO;
 
         for input in inputs {
-            self.update_tick(input.time_stamp, Some(input.action));
+            match input.action {
+                InputAction::Left => {
+                    if let InputState::Pressed(_) = input.state && let InputState::Pressed(_) = self.input_action_states.left  {
+                        panic!("got told the {:?} button was pressed, while it was already held down", input.action);
+                    }
+
+                    self.input_action_states.left = input.state;
+
+                    self.update_tick(input.time_stamp, Some(input.action.into()));
+                },
+                InputAction::Right => {
+                    if let InputState::Pressed(_) = input.state && let InputState::Pressed(_) = self.input_action_states.right  {
+                        panic!("got told the {:?} button was pressed, while it was already held down", input.action);
+                    }
+
+                    self.input_action_states.right = input.state;
+
+                    self.update_tick(input.time_stamp, Some(input.action.into()));
+                },
+                InputAction::SoftDrop => {
+                    if let InputState::Pressed(_) = input.state && let InputState::Pressed(_) = self.input_action_states.soft_drop  {
+                        panic!("got told the {:?} button was pressed, while it was already held down", input.action);
+                    }
+
+                    self.input_action_states.soft_drop = input.state;
+
+                    self.update_tick(input.time_stamp, None);
+                },
+                InputAction::HardDrop
+                | InputAction::RotateClockwise
+                | InputAction::RotateCounterclockwise
+                | InputAction::Hold => {
+                    if let InputState::Released = input.state {
+                        panic!("i don't care that the {:?} button got released", input.action);
+                    }
+
+                    self.update_tick(input.time_stamp, Some(input.action.into()));
+                },
+            }
+
             total_time += input.time_stamp;
         }
 
@@ -55,7 +96,7 @@ impl<RNG: Rng> Game<RNG> {
         &self.state
     }
 
-    pub fn update_tick(&mut self, delta_time: Duration, input: Option<InputAction>) -> &GameState {
+    fn update_tick(&mut self, delta_time: Duration, input: Option<OneshotAction>) -> &GameState {
         match self.state.phase {
             GamePhase::GenerationPhase => {
                 while self.state.space_for_bag() {
@@ -89,22 +130,69 @@ impl<RNG: Rng> Game<RNG> {
                 self.state.phase = GamePhase::FallingPhase;
             }
             GamePhase::FallingPhase => {
-                // TODO: Handle input
+                // update input timers
+
+                self.input_action_states.update_timers(delta_time);
+
+                // find out if the left or right was last pressed
+                let latest = [
+                    (InputAction::Left, &mut self.input_action_states.left),
+                    (InputAction::Right, &mut self.input_action_states.right),
+                ]
+                .into_iter()
+                .filter_map(|(action, state)| {
+                    match state {
+                        InputState::Pressed {
+                            time_since_press,
+                            time_simulated,
+                        } => Some((action, time_since_press, time_simulated)),
+                        _ => None,
+                    }
+                })
+                .min_by_key(|(_, time_since_press, _)| **time_since_press);
+
+                if let Some((InputAction::Left, time_since_press, time_simulated)) = latest {
+                    while time_simulated < time_since_press {
+                        // time_simulated = 0
+                        //
+                        // time_since_press 500 ms
+                        //
+                        // das 200
+                        // arr 50
+                        //
+                        // find the sequence
+                        //
+                        // 200
+                        // 50 * 6
+
+                        // Check if we simulated the das move
+                        // If yes we check if we have to simulate the das
+                        //
+                        // Ok it just came to my realization that this is wrong...
+                        // I have to make the actions all part of the render_tick method.
+                        // AAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHH
+                        // Imma just commit it and work on something else.
+                        if *time_simulated < self.settings.das {
+                            
+                        }
+                    }
+                } else if let Some((InputAction::Right, time_since_press, time_simulated)) = latest {
+                }
 
                 match input {
-                    Some(InputAction::Left) => {
+                    Some(OneshotAction::Left) => {
                         self.state.try_move(-1, 0);
                     }
-                    Some(InputAction::Right) => {
+                    Some(OneshotAction::Right) => {
                         self.state.try_move(1, 0);
                     }
-                    Some(InputAction::RotateClockwise) => {
+                    Some(OneshotAction::RotateClockwise) => {
                         self.state.try_rotate(true);
                     }
-                    Some(InputAction::RotateCounterclockwise) => {
+                    Some(OneshotAction::RotateCounterclockwise) => {
                         self.state.try_rotate(false);
                     }
-                    Some(InputAction::Hold) => {
+                    Some(OneshotAction::Hold) => {
                         if self.state.can_hold {
                             self.state.can_hold = false;
 
@@ -190,13 +278,47 @@ impl<RNG: Rng> Game<RNG> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Input {
-    pub action: InputAction,
-    pub time_stamp: Duration,
+    action: InputAction,
+    state: InputState,
+    time_stamp: Duration,
 }
 
 impl Input {
-    pub fn new(action: InputAction, time_stamp: Duration) -> Self {
-        Self { action, time_stamp }
+    pub fn release(action: InputAction, time_stamp: Duration) -> Self {
+        Self {
+            action,
+            state: InputState::Released,
+            time_stamp,
+        }
+    }
+
+    pub fn press(action: InputAction, time_stamp: Duration) -> Self {
+        Self {
+            action,
+            state: InputState::Pressed {
+                time_since_press: Duration::ZERO,
+                time_simulated: Duration::ZERO,
+            },
+            time_stamp,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+enum InputState {
+    #[default]
+    Released,
+    Pressed {
+        time_since_press: Duration,
+        time_simulated: Duration,
+    }
+}
+
+impl InputState {
+    fn update_timer(&mut self, delta_time: Duration) {
+        if let Self::Pressed { time_since_press, time_simulated } = self {
+            *time_since_press += delta_time;
+        }
     }
 }
 
@@ -211,9 +333,52 @@ pub enum InputAction {
     Hold,
 }
 
+// Every action but SoftDrop, since it's more of a toggle.
+// Left and Right are still oneshot actions since they happen once, but can also repeat.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum OneshotAction {
+    Left,
+    Right,
+    HardDrop,
+    RotateClockwise,
+    RotateCounterclockwise,
+    Hold,
+}
+
+impl From<InputAction> for OneshotAction {
+    fn from(value: InputAction) -> Self {
+        match value {
+            InputAction::Left => Self::Left,
+            InputAction::Right => Self::Right,
+            InputAction::HardDrop => Self::HardDrop,
+            InputAction::SoftDrop => panic!("soft drop isn't a oneshot action"),
+            InputAction::RotateClockwise => Self::RotateClockwise,
+            InputAction::RotateCounterclockwise => Self::RotateCounterclockwise,
+            InputAction::Hold => Self::Hold,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+struct InputActionStates {
+    soft_drop: InputState,
+    left: InputState,
+    right: InputState,
+}
+
+impl InputActionStates {
+    fn update_timers(&mut self, delta_time: Duration) {
+        self.soft_drop.update_timer(delta_time);
+        self.left.update_timer(delta_time);
+        self.right.update_timer(delta_time);
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Settings {
     lockdown: LockdownRules,
+    arr: Duration, // Time until next automatic repeat
+    das: Duration, // Time until arr kicks in
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
